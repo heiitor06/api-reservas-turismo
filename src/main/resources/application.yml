@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: api-agencia
+  # Valores de desenvolvimento (batem com o compose.yaml).
+  # Em outro ambiente, sobrescrever com SPRING_DATASOURCE_URL / _USERNAME / _PASSWORD.
+  datasource:
+    url: jdbc:postgresql://localhost:5432/agencia
+    username: agencia
+    password: agencia
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
