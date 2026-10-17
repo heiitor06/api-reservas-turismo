@@ -71,6 +71,24 @@ public abstract class IntegrationTestBase {
 				.andReturn());
 	}
 
+	protected long criarCliente(String nome, String cpf) throws Exception {
+		return idDe(mockMvc.perform(post("/api/clientes").contentType(MediaType.APPLICATION_JSON).content("""
+				{"nome": "%s", "documento": "%s", "email": "cliente@email.com", "telefone": "(98) 99999-0000"}
+				""".formatted(nome, cpf)))
+				.andExpect(status().isCreated())
+				.andReturn());
+	}
+
+	/** Devolve o código público da reserva (ex.: RSV-7K2QXM). */
+	protected String criarReserva(long clienteId, long saidaId, int qtdPassageiros) throws Exception {
+		MvcResult resultado = mockMvc.perform(post("/api/reservas").contentType(MediaType.APPLICATION_JSON).content("""
+				{"clienteId": %d, "saidaId": %d, "qtdPassageiros": %d}
+				""".formatted(clienteId, saidaId, qtdPassageiros)))
+				.andExpect(status().isCreated())
+				.andReturn();
+		return JsonPath.read(resultado.getResponse().getContentAsString(), "$.codigo");
+	}
+
 	protected static long idDe(MvcResult resultado) throws Exception {
 		Number id = JsonPath.read(resultado.getResponse().getContentAsString(), "$.id");
 		return id.longValue();

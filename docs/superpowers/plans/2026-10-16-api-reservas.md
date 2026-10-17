@@ -288,7 +288,7 @@
   - `ReservaService`: `ReservaResponse criar(CriarReservaRequest)`, `ReservaResponse buscar(String codigo)`, `ReservaResponse cancelar(String codigo)`
   - `CriarReservaRequest(@NotNull clienteId, @NotNull saidaId, @NotNull @Min(1) qtdPassageiros)`
   - `ReservaResponse(codigo, clienteId, clienteNome, saidaId, pacoteNome, dataPartida, dataRetorno, qtdPassageiros, valorUnitario, percentualDesconto, valorTotal, status, criadaEm, canceladaEm)`
-  - Regras do `criar`: pacote inativo → 409; `saida.jaPartiu(hoje)` → 409; depois `saida.reservarVagas(qtd)`
+  - Regras do `criar`: pacote inativo → 409; `saida.jaPartiu(hoje)` → 409; depois `Reserva.criar(...)`, que chama `saida.reservarVagas(qtd)` por dentro (e `reserva.cancelar` chama `saida.devolverVagas`): não existe reserva ativa sem vaga debitada
   - **Versão ingênua de propósito:** `saidaRepository.findById` sem lock
 
 - [ ] **Step 1: Unitários** em `ReservaTest`: `confirmarPendente_ok`, `confirmarCancelada_lanca`, `cancelarConfirmada_ok`, `cancelarCancelada_lanca`, `codigoGerado_temFormatoEsperado` (regex `^RSV-[A-HJ-NP-Z2-9]{6}$`) → FAIL, implementar, PASS
