@@ -16,9 +16,13 @@ public class ClockConfig {
 
 	public static final ZoneId FUSO_AGENCIA = ZoneId.of("America/Sao_Paulo");
 
+	/**
+	 * Em milissegundos: o Postgres guarda timestamptz em microssegundos e arredonda o resto, então um Instant
+	 * com nanossegundos voltaria diferente do banco (o POST e o GET mostrariam horários distintos).
+	 */
 	@Bean
 	Clock clock() {
-		return Clock.system(FUSO_AGENCIA);
+		return Clock.tickMillis(FUSO_AGENCIA);
 	}
 
 }
