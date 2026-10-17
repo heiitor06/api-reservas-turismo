@@ -1,5 +1,6 @@
 package dev.carlosheitor.agencia.reserva;
 
+import static dev.carlosheitor.agencia.support.Concorrencia.executarJuntos;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -8,12 +9,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -203,26 +202,6 @@ class ConcorrenciaReservaIT extends IntegrationTestBase {
 			liberar.countDown();
 		}
 		assertThat(vagas(saidaId)).isEqualTo(10);
-	}
-
-	/** Dispara as tarefas ao mesmo tempo: todas esperam a largada e saem juntas. */
-	private void executarJuntos(int quantidade, java.util.function.IntFunction<Callable<Void>> tarefa)
-			throws Exception {
-		CountDownLatch largada = new CountDownLatch(1);
-		List<Future<Void>> resultados = new ArrayList<>();
-		try (ExecutorService executor = Executors.newFixedThreadPool(quantidade)) {
-			for (int i = 0; i < quantidade; i++) {
-				Callable<Void> trabalho = tarefa.apply(i);
-				resultados.add(executor.submit(() -> {
-					largada.await();
-					return trabalho.call();
-				}));
-			}
-			largada.countDown();
-		}
-		for (Future<Void> resultado : resultados) {
-			resultado.get();
-		}
 	}
 
 	private int vagas(long saidaId) {

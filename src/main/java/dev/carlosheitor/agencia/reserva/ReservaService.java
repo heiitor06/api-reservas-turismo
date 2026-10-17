@@ -10,6 +10,7 @@ import dev.carlosheitor.agencia.cliente.Cliente;
 import dev.carlosheitor.agencia.cliente.ClienteService;
 import dev.carlosheitor.agencia.compartilhado.erro.OperacaoInvalidaException;
 import dev.carlosheitor.agencia.compartilhado.erro.RecursoNaoEncontradoException;
+import dev.carlosheitor.agencia.pagamento.PagamentoRepository;
 import dev.carlosheitor.agencia.preco.CalculadoraPreco;
 import dev.carlosheitor.agencia.preco.CalculoReserva;
 import dev.carlosheitor.agencia.reserva.dto.CriarReservaRequest;
@@ -22,15 +23,18 @@ import dev.carlosheitor.agencia.saida.SaidaService;
 public class ReservaService {
 
 	private final ReservaRepository repository;
+	private final PagamentoRepository pagamentoRepository;
 	private final ClienteService clienteService;
 	private final SaidaService saidaService;
 	private final CalculadoraPreco calculadora;
 	private final GeradorCodigoReserva geradorCodigo;
 	private final Clock clock;
 
-	public ReservaService(ReservaRepository repository, ClienteService clienteService, SaidaService saidaService,
-			CalculadoraPreco calculadora, GeradorCodigoReserva geradorCodigo, Clock clock) {
+	public ReservaService(ReservaRepository repository, PagamentoRepository pagamentoRepository,
+			ClienteService clienteService, SaidaService saidaService, CalculadoraPreco calculadora,
+			GeradorCodigoReserva geradorCodigo, Clock clock) {
 		this.repository = repository;
+		this.pagamentoRepository = pagamentoRepository;
 		this.clienteService = clienteService;
 		this.saidaService = saidaService;
 		this.calculadora = calculadora;
@@ -51,11 +55,11 @@ public class ReservaService {
 		CalculoReserva calculo = calculadora.calcularReserva(saida.getPacote().getPrecoBase(), request.qtdPassageiros());
 		Reserva reserva = Reserva.criar(geradorCodigo.gerar(), cliente, saida, request.qtdPassageiros(), calculo,
 				clock.instant());
-		return ReservaResponse.from(repository.save(reserva));
+		return resposta(repository.save(reserva));
 	}
 
 	public ReservaResponse buscar(String codigo) {
-		return ReservaResponse.from(obterPorCodigo(codigo));
+		return resposta(obterPorCodigo(codigo));
 	}
 
 	/**
@@ -73,7 +77,11 @@ public class ReservaService {
 				.orElseThrow(() -> new RecursoNaoEncontradoException("Reserva", codigo));
 
 		reserva.cancelar(clock.instant());
-		return ReservaResponse.from(reserva);
+		return resposta(reserva);
+	}
+
+	private ReservaResponse resposta(Reserva reserva) {
+		return ReservaResponse.from(reserva, pagamentoRepository.findByReservaIdOrderByCriadoEmAscIdAsc(reserva.getId()));
 	}
 
 	private void exigirSaidaVendavel(Saida saida) {

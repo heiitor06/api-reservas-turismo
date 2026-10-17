@@ -16,6 +16,7 @@ public enum TipoProblema {
 	OPERACAO_INVALIDA(HttpStatus.CONFLICT, "operacao-invalida", "Operação inválida"),
 	RECURSO_DUPLICADO(HttpStatus.CONFLICT, "recurso-duplicado", "Recurso duplicado"),
 	VAGAS_INSUFICIENTES(HttpStatus.CONFLICT, "vagas-insuficientes", "Vagas insuficientes"),
+	SALDO_EXCEDIDO(HttpStatus.CONFLICT, "saldo-excedido", "Saldo excedido"),
 	TENTE_NOVAMENTE(HttpStatus.SERVICE_UNAVAILABLE, "tente-novamente", "Tente novamente"),
 	ERRO_INTERNO(HttpStatus.INTERNAL_SERVER_ERROR, "erro-interno", "Erro interno");
 

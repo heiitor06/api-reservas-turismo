@@ -23,4 +23,9 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
 	@Query("select r from Reserva r where r.codigo = :codigo")
 	Optional<Reserva> findByCodigoForUpdate(String codigo);
 
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	@QueryHints(@QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000"))
+	@Query("select r from Reserva r where r.id = :id")
+	Optional<Reserva> findByIdForUpdate(Long id);
+
 }

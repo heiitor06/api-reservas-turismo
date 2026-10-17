@@ -177,7 +177,30 @@ linha (que é o que importa para as vagas), mas deixa a checagem de FK passar, p
 Suíte completa (`./mvnw verify`, 109 testes) rodada **3 vezes seguidas**: 3 × `BUILD SUCCESS`, sem falha
 intermitente.
 
-## 6. O que ficou de fora (de propósito)
+## 6. O mesmo problema nos pagamentos
+
+A reserva aceita vários pagamentos (sinal + saldo, tentativas recusadas). Três regras dependem de enxergar
+os outros pagamentos da mesma reserva: não passar do total, aprovar uma vez só e confirmar a reserva quando
+os aprovados cobrem o total. Implementado primeiro sem lock, os testes de `ConcorrenciaPagamentoIT` deram:
+
+| Teste | Esperado | Sem lock |
+|---|---|---|
+| Dois pagamentos de R$ 3.000 ao mesmo tempo, reserva de R$ 3.000 | 1 aceito, 1 `saldo-excedido` | **2 aceitos**: R$ 6.000 comprometidos |
+| O mesmo webhook de aprovação chegando duas vezes | 1 aceito, 1 recusado | **2 aceitos** |
+| Duas metades de R$ 1.500 aprovadas juntas (repetido 20×) | reserva `CONFIRMADA` | **15 de 20** ficaram `PENDENTE`, com a reserva 100% paga |
+
+O terceiro é o mais traiçoeiro: cada transação vê só a própria aprovação (1.500 de 3.000), nenhuma confirma, e
+o cliente pagou tudo sem a reserva confirmar. A janela é curta (entre ler os pagamentos e o commit), e numa
+execução única o teste passou por sorte. Por isso ele é um `@RepeatedTest(20)`.
+
+**Correção:** toda operação de pagamento trava a **reserva** antes de ler ou mudar qualquer pagamento dela.
+Na aprovação, primeiro se busca só o `reservaId` do pagamento, trava a reserva e só então se carrega o
+pagamento, pelo mesmo motivo da seção 4 (cópia antiga em memória). Pagamentos travam só a reserva e o
+cancelamento trava saída e depois reserva, então as esperas nunca formam ciclo.
+
+Depois da correção: os três verdes, incluindo as 20 repetições, em duas execuções seguidas.
+
+## 7. O que ficou de fora (de propósito)
 
 - **`@Version` na saída:** resolveria outro problema, um `PUT` administrativo com dados velhos sobrescrevendo
   uma alteração. Fica para quando houver edição de saída.
