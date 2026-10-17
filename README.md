@@ -1,5 +1,7 @@
 # API de Reservas para Agência de Turismo
 
+[![CI](https://github.com/heiitor06/api-reservas-turismo/actions/workflows/ci.yml/badge.svg)](https://github.com/heiitor06/api-reservas-turismo/actions/workflows/ci.yml)
+
 API REST para vender pacotes turísticos: destinos, pacotes com roteiro, saídas com lotação, clientes,
 reservas e pagamentos. O ponto central é **não vender a mesma vaga duas vezes** quando várias pessoas
 reservam ao mesmo tempo, e provar isso com testes contra um Postgres de verdade.
@@ -10,8 +12,9 @@ Springdoc OpenAPI · JUnit 5, Mockito, AssertJ, Testcontainers · Docker Compose
 ## Destaques
 
 - **Controle de concorrência provado por teste.** 20 threads disputando 5 vagas: na versão sem lock, as 20
-  conseguiram reservar; com lock pessimista, exatamente 5. O histórico de commits mostra o antes (`f819f51`,
-  teste vermelho) e o depois (`d0fe964`). A análise completa, com as alternativas comparadas, está em
+  conseguiram reservar; com lock pessimista, exatamente 5. O histórico de commits mostra o antes
+  ([`db8c5d1`](https://github.com/heiitor06/api-reservas-turismo/commit/db8c5d1), teste vermelho) e o depois
+  ([`211f311`](https://github.com/heiitor06/api-reservas-turismo/commit/211f311)). A análise completa, com as alternativas comparadas, está em
   [docs/concorrencia.md](docs/concorrencia.md).
 - **Os mesmos bugs de corrida em outros lugares**, encontrados e cobertos: cancelamento duplo devolvendo vaga
   duas vezes, dois pagamentos passando do total, reserva 100% paga que não confirmava.
