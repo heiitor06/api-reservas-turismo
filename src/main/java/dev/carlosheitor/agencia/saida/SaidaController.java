@@ -16,8 +16,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 import dev.carlosheitor.agencia.saida.dto.AlterarStatusSaidaRequest;
 import dev.carlosheitor.agencia.saida.dto.SaidaRequest;
 import dev.carlosheitor.agencia.saida.dto.SaidaResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+@Tag(name = "Saídas", description = "Datas de partida de cada pacote, com lotação")
 @RestController
 @RequestMapping("/api")
 public class SaidaController {

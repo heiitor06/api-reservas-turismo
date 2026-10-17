@@ -21,8 +21,10 @@ import dev.carlosheitor.agencia.pacote.dto.ItemRoteiroRequest;
 import dev.carlosheitor.agencia.pacote.dto.PacoteRequest;
 import dev.carlosheitor.agencia.pacote.dto.PacoteResponse;
 import dev.carlosheitor.agencia.pacote.dto.PacoteResumoResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+@Tag(name = "Pacotes", description = "Pacotes turísticos e seus roteiros")
 @RestController
 @RequestMapping("/api/pacotes")
 public class PacoteController {

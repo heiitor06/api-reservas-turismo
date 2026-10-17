@@ -16,8 +16,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import dev.carlosheitor.agencia.cliente.dto.ClienteRequest;
 import dev.carlosheitor.agencia.cliente.dto.ClienteResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+@Tag(name = "Clientes", description = "Cadastro de clientes (CPF mascarado nas respostas)")
 @RestController
 @RequestMapping("/api/clientes")
 public class ClienteController {

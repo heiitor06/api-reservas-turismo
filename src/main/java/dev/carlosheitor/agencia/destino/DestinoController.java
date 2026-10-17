@@ -17,8 +17,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import dev.carlosheitor.agencia.destino.dto.DestinoRequest;
 import dev.carlosheitor.agencia.destino.dto.DestinoResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+@Tag(name = "Destinos", description = "Lugares atendidos pela agência")
 @RestController
 @RequestMapping("/api/destinos")
 public class DestinoController {
