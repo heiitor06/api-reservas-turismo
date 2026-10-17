@@ -21,3 +21,12 @@ spring:
     # Mensagens de validação sempre em pt-BR, independente do idioma da máquina ou do header
     locale: pt_BR
     locale-resolver: fixed
+
+# Regras comerciais (valores de exemplo). Percentuais como fração: 0.10 = 10%.
+agencia:
+  preco:
+    minimo-passageiros-grupo: 6
+    percentual-desconto-grupo: 0.10
+    parcelas-sem-taxa: 3
+    maximo-parcelas: 10
+    taxa-por-parcela-extra: 0.015

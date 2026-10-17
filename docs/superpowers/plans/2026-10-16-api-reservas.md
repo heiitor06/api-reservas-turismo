@@ -229,9 +229,9 @@
   - `record CalculoReserva(BigDecimal valorUnitario, BigDecimal subtotal, BigDecimal percentualDesconto, BigDecimal valorTotal)`
   - `CalculadoraPreco` (`@Component`, construtor recebendo `PrecoProperties`):
     - `CalculoReserva calcularReserva(BigDecimal precoBase, int qtdPassageiros)`
-    - `BigDecimal taxaParcelamento(FormaPagamento forma, int parcelas)`: `IllegalArgumentException` se PIX/BOLETO com parcelas ≠ 1, ou se parcelas fora de 1..`maximoParcelas`
+    - `BigDecimal taxaParcelamento(FormaPagamento forma, int parcelas)`: `ParcelamentoInvalidoException` (400 `dados-invalidos`) se PIX/BOLETO com parcelas ≠ 1, ou se parcelas fora de 1..`maximoParcelas`. A regra fica só aqui, lida da config, sem duplicar no DTO
     - `BigDecimal valorCobrado(BigDecimal valor, BigDecimal taxa)`
-  - `CotacaoRequest(@NotNull saidaId, @NotNull @Min(1) qtdPassageiros, @NotNull forma, @NotNull @Min(1) @Max(10) parcelas)`, com `@AssertTrue(message = "PIX e boleto só aceitam 1 parcela") boolean isParcelasCompativeis()`
+  - `CotacaoRequest(@NotNull saidaId, @NotNull @Min(1) qtdPassageiros, @NotNull forma, @NotNull @Min(1) parcelas)`
   - `CotacaoResponse(valorUnitario, subtotal, percentualDesconto, valorDesconto, valorTotal, taxaParcelamento, valorCobrado, parcelas, valorParcela, vagasDisponiveis)`
   - Cotação não trava nada nem valida vagas: só informa `vagasDisponiveis`
 
@@ -359,7 +359,7 @@
     - `PagamentoResponse registrar(String codigoReserva, RegistrarPagamentoRequest)`: trava a reserva; reserva ≠ `PENDENTE` → 409; saldo = `valorTotal − soma(APROVADO, PENDENTE)`; `valor > saldo` → `SaldoExcedidoException`
     - `PagamentoResponse aprovar(Long pagamentoId)`: `findReservaIdByPagamentoId` → trava a reserva → **só então** carrega o pagamento (lido depois do lock, nunca desatualizado) → reserva `CANCELADA` → 409 → `pagamento.aprovar()` → se soma(APROVADO) = `valorTotal`, `reserva.confirmar()`
     - `PagamentoResponse recusar(Long pagamentoId)`: mesmo caminho de lock, sem confirmar
-  - `RegistrarPagamentoRequest(@NotNull @Positive @Digits(integer=10, fraction=2) valor, @NotNull forma, @NotNull @Min(1) @Max(10) parcelas)` + o mesmo `@AssertTrue` da cotação
+  - `RegistrarPagamentoRequest(@NotNull @Positive @Digits(integer=10, fraction=2) valor, @NotNull forma, @NotNull @Min(1) parcelas)`; limite e "PIX à vista" vêm de `CalculadoraPreco.taxaParcelamento`
   - `PagamentoResponse(id, valor, forma, parcelas, taxaPercentual, valorCobrado, status, criadoEm)`
 
 - [ ] **Step 1: Unitários** em `PagamentoTest`: `aprovarPendente_ok`, `aprovarAprovado_lanca`, `recusarRecusado_lanca` → FAIL, implementar, PASS
