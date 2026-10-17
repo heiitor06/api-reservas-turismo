@@ -39,14 +39,13 @@ public class ReservaService {
 	}
 
 	/**
-	 * VERSÃO INGÊNUA (de propósito): lê a saída sem lock. Duas transações simultâneas leem o mesmo
-	 * número de vagas, as duas passam na regra e as duas gravam: overbooking.
-	 * O ConcorrenciaReservaIT prova isso; a correção vem na próxima etapa.
+	 * A saída é lida com lock pessimista: reservas simultâneas na mesma saída entram uma de cada vez,
+	 * e cada uma vê as vagas já descontadas pela anterior. Reservas em saídas diferentes não se bloqueiam.
 	 */
 	@Transactional
 	public ReservaResponse criar(CriarReservaRequest request) {
 		Cliente cliente = clienteService.obterEntidade(request.clienteId());
-		Saida saida = saidaService.obterEntidade(request.saidaId());
+		Saida saida = saidaService.obterEntidadeComLock(request.saidaId());
 		exigirSaidaVendavel(saida);
 
 		CalculoReserva calculo = calculadora.calcularReserva(saida.getPacote().getPrecoBase(), request.qtdPassageiros());
@@ -59,9 +58,20 @@ public class ReservaService {
 		return ReservaResponse.from(obterPorCodigo(codigo));
 	}
 
+	/**
+	 * Ordem fixa dos locks: SAÍDA, depois RESERVA. Toda operação que trava as duas segue essa ordem,
+	 * então duas transações nunca ficam esperando uma pela outra em ciclo (deadlock).
+	 * A reserva é lida só depois dos locks: o status checado em reserva.cancelar() é o atual, e um
+	 * segundo cancelamento simultâneo encontra CANCELADA e é recusado.
+	 */
 	@Transactional
 	public ReservaResponse cancelar(String codigo) {
-		Reserva reserva = obterPorCodigo(codigo);
+		Long saidaId = repository.findSaidaIdByCodigo(codigo)
+				.orElseThrow(() -> new RecursoNaoEncontradoException("Reserva", codigo));
+		saidaService.obterEntidadeComLock(saidaId);
+		Reserva reserva = repository.findByCodigoForUpdate(codigo)
+				.orElseThrow(() -> new RecursoNaoEncontradoException("Reserva", codigo));
+
 		reserva.cancelar(clock.instant());
 		return ReservaResponse.from(reserva);
 	}

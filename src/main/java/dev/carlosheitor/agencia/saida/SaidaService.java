@@ -66,4 +66,9 @@ public class SaidaService {
 		return repository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Saída", id));
 	}
 
+	/** Para quem vai mexer nas vagas: trava a linha (lock pessimista) até o fim da transação de quem chamou. */
+	public Saida obterEntidadeComLock(Long id) {
+		return repository.findByIdForUpdate(id).orElseThrow(() -> new RecursoNaoEncontradoException("Saída", id));
+	}
+
 }

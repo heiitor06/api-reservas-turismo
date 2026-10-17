@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
@@ -56,6 +57,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 			return ResponseEntity.status(TipoProblema.RECURSO_DUPLICADO.status()).body(problema);
 		}
 		return tratarInesperado(ex);
+	}
+
+	/**
+	 * Não conseguiu o lock a tempo (fila longa na mesma saída) ou o banco escolheu esta transação
+	 * para desfazer um deadlock. Nada foi gravado, então repetir a requisição é seguro.
+	 */
+	@ExceptionHandler(PessimisticLockingFailureException.class)
+	ResponseEntity<ProblemDetail> tratarLockIndisponivel(PessimisticLockingFailureException ex) {
+		log.warn("Lock indisponível: {}", ex.getMostSpecificCause().getMessage());
+		ProblemDetail problema = TipoProblema.TENTE_NOVAMENTE.problema(
+				"Muitas operações simultâneas neste recurso. Tente novamente em instantes.");
+		return ResponseEntity.status(TipoProblema.TENTE_NOVAMENTE.status())
+				.header(HttpHeaders.RETRY_AFTER, "1")
+				.body(problema);
 	}
 
 	@ExceptionHandler(Exception.class)
