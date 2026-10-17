@@ -1,12 +1,10 @@
 package dev.carlosheitor.agencia;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 
-@Import(TestcontainersConfiguration.class)
-@SpringBootTest
-class ApiAgenciaApplicationIT {
+import dev.carlosheitor.agencia.support.IntegrationTestBase;
+
+class ApiAgenciaApplicationIT extends IntegrationTestBase {
 
 	@Test
 	void contextLoads() {

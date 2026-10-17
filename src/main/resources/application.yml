@@ -11,3 +11,13 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: validate
+  data:
+    web:
+      pageable:
+        # JSON de página estável ({content, page: {...}}) em vez de serializar o PageImpl
+        serialization-mode: via-dto
+        max-page-size: 100
+  web:
+    # Mensagens de validação sempre em pt-BR, independente do idioma da máquina ou do header
+    locale: pt_BR
+    locale-resolver: fixed

@@ -79,13 +79,13 @@
 
 **Interfaces:**
 - Produces:
-  - `abstract class NegocioException extends RuntimeException` com `NegocioException(HttpStatus status, String slug, String mensagem)`, `HttpStatus status()`, `String slug()`, `Map<String, Object> propriedades()` (padrão: vazio)
-  - `RecursoNaoEncontradoException(String recurso, Object id)` → 404 `recurso-nao-encontrado`, mensagem `"<recurso> <id> não encontrado(a)"`
+  - `enum TipoProblema` (status + slug + título, `ProblemDetail problema(String detalhe)`); cada etapa adiciona a constante que usar (`VAGAS_INSUFICIENTES`, `SALDO_EXCEDIDO`, `TENTE_NOVAMENTE`)
+  - `abstract class NegocioException extends RuntimeException` com `NegocioException(TipoProblema tipo, String mensagem)`, `TipoProblema tipo()`, `Map<String, Object> propriedades()` (padrão: vazio)
+  - `RecursoNaoEncontradoException(String recurso, Object id)` → 404 `recurso-nao-encontrado`, mensagem `"<recurso> <id> não existe"`
   - `OperacaoInvalidaException(String mensagem)` → 409 `operacao-invalida`
   - `RecursoDuplicadoException(String mensagem)` → 409 `recurso-duplicado`
-  - `Problemas.tipo(String slug): URI`
   - `GlobalExceptionHandler extends ResponseEntityExceptionHandler`: trata `NegocioException` (copiando `propriedades()` para o ProblemDetail); sobrescreve `handleMethodArgumentNotValid` (400 `dados-invalidos`, extensão `erros: [{campo, mensagem}]`) e `handleHttpMessageNotReadable` (400 `dados-invalidos`); `Exception` → 500 `erro-interno` com log do erro e mensagem genérica.
-  - Bean `Clock` (`Clock.systemUTC()`); `WebConfig` com `@EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO)`
+  - Bean `Clock` (`Clock.systemUTC()`); página serializada via `spring.data.web.pageable.serialization-mode: via-dto`; locale fixo `pt_BR` para mensagens de validação
   - `DestinoService`: `DestinoResponse criar(DestinoRequest)`, `Page<DestinoResponse> listar(Pageable)`, `DestinoResponse buscar(Long id)`, `DestinoResponse atualizar(Long id, DestinoRequest)`, `Destino obterEntidade(Long id)` (público, usado pelo Pacote)
   - `DestinoRequest(@NotBlank @Size(max=120) nome, @NotBlank @Size(max=120) cidade, @Size(max=2) uf, @NotBlank @Size(max=60) pais, descricao)`; `DestinoResponse.from(Destino)`
   - `RelogioTeste extends Clock`: começa em `2026-06-01T12:00:00Z`, `void avancar(Duration)`, `void definir(Instant)`; registrado como `@Primary` em `IntegrationTestBase`
