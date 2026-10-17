@@ -1,11 +1,13 @@
 package dev.carlosheitor.agencia.compartilhado.erro;
 
+import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
@@ -27,6 +29,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 	private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+	private static final String VIOLACAO_UNIQUE = "23505";
+
 	@ExceptionHandler(NegocioException.class)
 	ResponseEntity<ProblemDetail> tratarNegocio(NegocioException ex) {
 		ProblemDetail problema = ex.tipo().problema(ex.getMessage());
@@ -38,6 +42,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	ResponseEntity<ProblemDetail> tratarOrdenacaoInvalida(PropertyReferenceException ex) {
 		ProblemDetail problema = TipoProblema.DADOS_INVALIDOS.problema("Campo de ordenação inválido: " + ex.getPropertyName());
 		return ResponseEntity.badRequest().body(problema);
+	}
+
+	/**
+	 * Violação de UNIQUE (SQLState 23505) acontece quando duas requisições passam juntas pela checagem
+	 * "já existe?" do service: é conflito do cliente, não erro do servidor. Outras violações (FK, CHECK)
+	 * indicam bug no código e continuam como 500.
+	 */
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	ResponseEntity<ProblemDetail> tratarIntegridade(DataIntegrityViolationException ex) {
+		if (ex.getMostSpecificCause() instanceof SQLException sql && VIOLACAO_UNIQUE.equals(sql.getSQLState())) {
+			ProblemDetail problema = TipoProblema.RECURSO_DUPLICADO.problema("Já existe um registro com esses dados.");
+			return ResponseEntity.status(TipoProblema.RECURSO_DUPLICADO.status()).body(problema);
+		}
+		return tratarInesperado(ex);
 	}
 
 	@ExceptionHandler(Exception.class)

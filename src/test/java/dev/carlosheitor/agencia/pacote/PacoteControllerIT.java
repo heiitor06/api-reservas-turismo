@@ -38,7 +38,7 @@ class PacoteControllerIT extends IntegrationTestBase {
 				.andExpect(jsonPath("$.itens.length()").value(0))
 				.andReturn();
 
-		long pacoteId = id(resultado);
+		long pacoteId = idDe(resultado);
 		assertThat(resultado.getResponse().getHeader("Location")).endsWith("/api/pacotes/" + pacoteId);
 		mockMvc.perform(get("/api/pacotes/" + pacoteId)).andExpect(status().isOk());
 	}
@@ -192,23 +192,6 @@ class PacoteControllerIT extends IntegrationTestBase {
 				.andExpect(jsonPath("$.ativo").value(false));
 	}
 
-	private long criarDestino(String nome) throws Exception {
-		MvcResult resultado = mockMvc.perform(post("/api/destinos").contentType(MediaType.APPLICATION_JSON).content("""
-				{"nome": "%s", "cidade": "Barreirinhas", "uf": "MA", "pais": "Brasil"}
-				""".formatted(nome)))
-				.andExpect(status().isCreated())
-				.andReturn();
-		return id(resultado);
-	}
-
-	private long criarPacote(long destinoId, String nome, int duracaoDias, boolean ativo) throws Exception {
-		MvcResult resultado = mockMvc.perform(post("/api/pacotes").contentType(MediaType.APPLICATION_JSON)
-				.content(pacoteJson(destinoId, nome, duracaoDias, "1500.00", ativo)))
-				.andExpect(status().isCreated())
-				.andReturn();
-		return id(resultado);
-	}
-
 	private long adicionarItem(long pacoteId, String tipo, String titulo, int dia, int ordem) throws Exception {
 		MvcResult resultado = mockMvc.perform(post("/api/pacotes/" + pacoteId + "/itens").contentType(MediaType.APPLICATION_JSON)
 				.content(itemJson(tipo, titulo, dia, ordem)))
@@ -217,11 +200,6 @@ class PacoteControllerIT extends IntegrationTestBase {
 		List<Number> ids = JsonPath.read(resultado.getResponse().getContentAsString(),
 				"$.itens[?(@.titulo == '" + titulo + "')].id");
 		return ids.getFirst().longValue();
-	}
-
-	private static long id(MvcResult resultado) throws Exception {
-		Number id = JsonPath.read(resultado.getResponse().getContentAsString(), "$.id");
-		return id.longValue();
 	}
 
 	private static String pacoteJson(long destinoId, String nome, int duracaoDias, String precoBase, boolean ativo) {

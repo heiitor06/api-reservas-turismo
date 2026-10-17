@@ -4,8 +4,9 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.concurrent.atomic.AtomicReference;
+
+import dev.carlosheitor.agencia.compartilhado.config.ClockConfig;
 
 /**
  * Relógio controlável pelos testes: começa num instante fixo e só anda quando o teste manda.
@@ -36,7 +37,7 @@ public class RelogioTeste extends Clock {
 
 	@Override
 	public ZoneId getZone() {
-		return ZoneOffset.UTC;
+		return ClockConfig.FUSO_AGENCIA;
 	}
 
 	@Override

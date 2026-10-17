@@ -15,6 +15,7 @@ public enum TipoProblema {
 	RECURSO_NAO_ENCONTRADO(HttpStatus.NOT_FOUND, "recurso-nao-encontrado", "Recurso não encontrado"),
 	OPERACAO_INVALIDA(HttpStatus.CONFLICT, "operacao-invalida", "Operação inválida"),
 	RECURSO_DUPLICADO(HttpStatus.CONFLICT, "recurso-duplicado", "Recurso duplicado"),
+	VAGAS_INSUFICIENTES(HttpStatus.CONFLICT, "vagas-insuficientes", "Vagas insuficientes"),
 	ERRO_INTERNO(HttpStatus.INTERNAL_SERVER_ERROR, "erro-interno", "Erro interno");
 
 	private static final String BASE_TYPE = "https://api.agencia.local/problemas/";

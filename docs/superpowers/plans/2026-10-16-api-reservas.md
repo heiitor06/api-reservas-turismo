@@ -22,7 +22,8 @@
 - Java 25; Spring Boot 4.1.x; versões das dependências geridas pelo parent do Boot. Versão fora do parent (Springdoc) confirmada na documentação oficial na hora de adicionar.
 - `spring.jpa.hibernate.ddl-auto=validate`, `spring.jpa.open-in-view=false`. Schema só por Flyway.
 - Dinheiro: `BigDecimal`, colunas `NUMERIC(12,2)`; percentuais como fração em `NUMERIC(5,4)` (10% = `0.1000`). Arredondamento `HALF_EVEN`, 2 casas, só no valor final.
-- Datas: `Instant` / `timestamptz` (UTC) para momentos; `LocalDate` / `date` para `data_partida`. Toda leitura de "agora" via bean `Clock`.
+- Datas: `Instant` / `timestamptz` (UTC) para momentos; `LocalDate` / `date` para `data_partida`. Toda leitura de "agora" via bean `Clock`, que está no fuso `ClockConfig.FUSO_AGENCIA` (America/Sao_Paulo): "hoje" é sempre `LocalDate.now(clock)`.
+- Violação de `UNIQUE` (SQLState 23505) vira 409 `recurso-duplicado` no `GlobalExceptionHandler`; checagens `existsBy...` no service ficam só para a mensagem amigável.
 - Enums gravados como `varchar` + `CHECK`; mapeados com `@Enumerated(EnumType.STRING)`.
 - Entidade nunca sai do service: controller recebe e devolve `record`.
 - Erros sempre em `ProblemDetail`, com `type` = `https://api.agencia.local/problemas/<slug>` (tabela da spec, seção 8).
