@@ -9,6 +9,9 @@ reservam ao mesmo tempo, e provar isso com testes contra um Postgres de verdade.
 **Stack:** Java 25 · Spring Boot 4.1 (Web MVC, Data JPA, Validation) · PostgreSQL 17 · Flyway ·
 Springdoc OpenAPI · JUnit 5, Mockito, AssertJ, Testcontainers · Docker Compose
 
+**Front-end:** [rumo-agencia-web](https://github.com/heiitor06/rumo-agencia-web), o site de uma agência fictícia
+(Next.js 16) que consome esta API: vagas e preços ao vivo, cotação, reserva e pagamento em partes.
+
 ## Destaques
 
 - **Controle de concorrência provado por teste.** 20 threads disputando 5 vagas: na versão sem lock, as 20
