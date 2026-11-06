@@ -12,6 +12,9 @@ Springdoc OpenAPI · JUnit 5, Mockito, AssertJ, Testcontainers · Docker Compose
 **Front-end:** [rumo-agencia-web](https://github.com/heiitor06/rumo-agencia-web), o site de uma agência fictícia
 (Next.js 16) que consome esta API: vagas e preços ao vivo, cotação, reserva e pagamento em partes.
 
+**No ar:** [site](https://rumo-agencia-web.vercel.app) · [Swagger da API](https://api-reservas-turismo.onrender.com/swagger-ui.html)
+(Render + Neon, plano gratuito: a primeira chamada depois de um tempo parada pode levar cerca de um minuto).
+
 ## Destaques
 
 - **Controle de concorrência provado por teste.** 20 threads disputando 5 vagas: na versão sem lock, as 20
